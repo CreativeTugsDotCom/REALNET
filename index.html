@@ -1,0 +1,3619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="REALNET - Real Estate Professional Networking"
+  />
+  <meta name="theme-color" content="#020617" />
+  <title>REALNET | Real Estate Networking</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide React -->
+  <script src="https://unpkg.com/lucide-react@0.468.0/dist/umd/lucide-react.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: [
+              "Inter",
+              "ui-sans-serif",
+              "system-ui",
+              "sans-serif"
+            ]
+          },
+          animation: {
+            "fade-in": "fadeIn .45s ease-out",
+            "slide-up": "slideUp .4s ease-out",
+            "pulse-soft": "pulseSoft 2s infinite"
+          },
+          keyframes: {
+            fadeIn: {
+              "0%": {
+                opacity: "0"
+              },
+              "100%": {
+                opacity: "1"
+              }
+            },
+            slideUp: {
+              "0%": {
+                opacity: "0",
+                transform: "translateY(14px)"
+              },
+              "100%": {
+                opacity: "1",
+                transform: "translateY(0)"
+              }
+            },
+            pulseSoft: {
+              "0%, 100%": {
+                transform: "scale(1)",
+                opacity: ".75"
+              },
+              "50%": {
+                transform: "scale(1.04)",
+                opacity: "1"
+              }
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body,
+    #root {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: #020617;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f8fafc;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 999px;
+    }
+
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .line-clamp-1 {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+
+    .line-clamp-2 {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    @media (max-width: 767px) {
+      body {
+        background: #0f172a;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const {
+      useState,
+      useEffect,
+      useMemo
+    } = React;
+
+    const {
+      Search,
+      Bell,
+      User,
+      Users,
+      MessageSquare,
+      Check,
+      Filter,
+      X,
+      ChevronRight,
+      Send,
+      ArrowLeft,
+      Zap,
+      LogOut,
+      MapPin,
+      Briefcase,
+      ExternalLink,
+      Crown,
+      CheckCircle,
+      Edit3,
+      Lock,
+      Sliders,
+      Smartphone,
+      CreditCard,
+      ShieldCheck
+    } = window.LucideReact;
+
+    /* =========================================================
+       DEMO DATA
+    ========================================================= */
+
+    const STORAGE_KEY = "realnet_demo_state_v2";
+
+    const INITIAL_PROFESSIONALS = [
+      {
+        id: "prof-1",
+        name: "Jennifer Carter",
+        role: "REALTOR",
+        company: "Carter Realty Group",
+        location: "Cleveland, OH",
+        rating: 4.9,
+        verified: true,
+        isFeatured: true,
+        connectionsCount: 248,
+        avatar:
+          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250",
+        bio:
+          "Residential real estate professional focused on Northeast Ohio relocations, client advisory, and property opportunities.",
+        expertise: [
+          "Residential",
+          "Luxury",
+          "Relocation",
+          "Valuation"
+        ],
+        contactPref: "In-App Message & Email",
+        email: "jennifer@carterrealty.com",
+        phone: "(216) 555-0192",
+        license: "OH-40291048"
+      },
+      {
+        id: "prof-2",
+        name: "Michael Johnson",
+        role: "INVESTOR",
+        company: "MJ Capital Partners",
+        location: "Akron, OH",
+        rating: 4.8,
+        verified: true,
+        isFeatured: true,
+        connectionsCount: 184,
+        avatar:
+          "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=250",
+        bio:
+          "Commercial and multi-family investor focused on value-add acquisitions across Northeast Ohio.",
+        expertise: [
+          "Multi-Family",
+          "Commercial",
+          "Joint Ventures",
+          "Value-Add"
+        ],
+        contactPref: "In-App Message Preferred",
+        email: "mjohnson@mjcapital.io",
+        phone: "(330) 555-0143",
+        license: "Private Investor"
+      },
+      {
+        id: "prof-3",
+        name: "Sarah Williams",
+        role: "LENDER",
+        company: "Williams Lending & Mortgage",
+        location: "Columbus, OH",
+        rating: 5.0,
+        verified: true,
+        isFeatured: false,
+        connectionsCount: 310,
+        avatar:
+          "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=250",
+        bio:
+          "Mortgage professional specializing in investor financing, conventional lending, refinancing, and commercial debt.",
+        expertise: [
+          "Mortgage",
+          "DSCR Loans",
+          "Refinancing",
+          "Commercial Debt"
+        ],
+        contactPref: "Phone & Direct Chat",
+        email: "swilliams@williamslending.com",
+        phone: "(614) 555-0188",
+        license: "NMLS #940129"
+      },
+      {
+        id: "prof-4",
+        name: "Marcus Wright",
+        role: "BROKER",
+        company: "Apex Commercial Real Estate",
+        location: "Elyria, OH",
+        rating: 4.7,
+        verified: false,
+        isFeatured: true,
+        connectionsCount: 142,
+        avatar:
+          "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=250",
+        bio:
+          "Commercial brokerage professional focused on Lorain County assets, industrial leasing, and land development.",
+        expertise: [
+          "Commercial",
+          "Brokerage",
+          "Industrial",
+          "Land Sales"
+        ],
+        contactPref: "In-App Messaging",
+        email: "marcus@apexcre.com",
+        phone: "(440) 555-0112",
+        license: "OH-BRK901842"
+      },
+      {
+        id: "prof-5",
+        name: "Elena Rostova",
+        role: "PROPERTY MANAGER",
+        company: "North Coast Asset Management",
+        location: "Elyria, OH",
+        rating: 4.9,
+        verified: true,
+        isFeatured: false,
+        connectionsCount: 96,
+        avatar:
+          "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=250",
+        bio:
+          "Property management specialist supporting leasing, operations, tenant coordination, and maintenance workflows.",
+        expertise: [
+          "Property Management",
+          "Tenant Screening",
+          "Maintenance Coordination"
+        ],
+        contactPref: "In-App Message",
+        email: "elena@northcoastam.com",
+        phone: "(440) 555-0177",
+        license: "OH-PM10293"
+      },
+      {
+        id: "prof-6",
+        name: "David Miller",
+        role: "CONTRACTOR",
+        company: "Miller & Sons Construction",
+        location: "Cleveland, OH",
+        rating: 4.8,
+        verified: false,
+        isFeatured: false,
+        connectionsCount: 215,
+        avatar:
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250",
+        bio:
+          "General contractor providing renovation, framing, multifamily turnaround, and construction services.",
+        expertise: [
+          "Development",
+          "Renovation",
+          "General Contracting",
+          "Permitting"
+        ],
+        contactPref: "Phone / Email",
+        email: "dave@millerconstruction.com",
+        phone: "(216) 555-0199",
+        license: "OH-CONTR88102"
+      }
+    ];
+
+    const INITIAL_CONVERSATIONS = [
+      {
+        id: "conv-1",
+        profId: "prof-1",
+        lastMessage:
+          "Sounds great! Let’s set up a call regarding the Lorain commercial opportunity.",
+        timestamp: "10:42 AM",
+        unread: true,
+        messages: [
+          {
+            id: "m1",
+            sender: "prof-1",
+            text: "Hi! Thanks for connecting on REALNET.",
+            time: "Yesterday 3:15 PM"
+          },
+          {
+            id: "m2",
+            sender: "me",
+            text:
+              "Hey Jennifer! Great to connect. Are you seeing much movement in multi-family right now?",
+            time: "Yesterday 3:20 PM"
+          },
+          {
+            id: "m3",
+            sender: "prof-1",
+            text:
+              "Sounds great! Let’s set up a call regarding the Lorain commercial opportunity.",
+            time: "10:42 AM"
+          }
+        ]
+      },
+      {
+        id: "conv-2",
+        profId: "prof-3",
+        lastMessage:
+          "I can get you pre-approved for that 12-unit DSCR loan inside 48 hours.",
+        timestamp: "Yesterday",
+        unread: false,
+        messages: [
+          {
+            id: "m10",
+            sender: "prof-3",
+            text:
+              "Welcome to the network! Let me know if you need any debt structuring.",
+            time: "Oct 1, 2026"
+          },
+          {
+            id: "m11",
+            sender: "me",
+            text:
+              "Thanks Sarah. Do you handle DSCR loans for out-of-state entities?",
+            time: "Oct 1, 2026"
+          },
+          {
+            id: "m12",
+            sender: "prof-3",
+            text:
+              "I can get you pre-approved for that 12-unit DSCR loan inside 48 hours.",
+            time: "Yesterday"
+          }
+        ]
+      }
+    ];
+
+    const INITIAL_NOTIFICATIONS = [
+      {
+        id: "notif-1",
+        type: "connection_accept",
+        profId: "prof-1",
+        text: "accepted your connection request.",
+        time: "1h ago",
+        read: false
+      },
+      {
+        id: "notif-2",
+        type: "connection_request",
+        profId: "prof-4",
+        text: "sent you a connection request.",
+        time: "3h ago",
+        read: false,
+        actionNeeded: true
+      },
+      {
+        id: "notif-3",
+        type: "suggested_connect",
+        profId: "prof-5",
+        text: "Matches your focus area in Elyria, OH.",
+        time: "1d ago",
+        read: true
+      }
+    ];
+
+    const DEFAULT_USER = {
+      id: "me",
+      name: "Alex Vance",
+      email: "alex.vance@example.com",
+      role: "INVESTOR",
+      company: "Vance Real Estate Holdings",
+      location: "Elyria, OH",
+      bio:
+        "Real estate investor focused on acquiring value-add multi-family and commercial properties in Northeastern Ohio.",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300",
+      expertise: [
+        "Investment",
+        "Commercial",
+        "Joint Ventures"
+      ],
+      isPro: false,
+      subscriptionPlan: null,
+      connectedIds: ["prof-1", "prof-3"],
+      pendingSentIds: ["prof-2"],
+      pendingReceivedIds: ["prof-4"]
+    };
+
+    /* =========================================================
+       UTILITIES
+    ========================================================= */
+
+    function loadSavedState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveState(state) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // Demo mode can continue without persistence.
+      }
+    }
+
+    function getInitialState() {
+      const saved = loadSavedState();
+
+      if (!saved) {
+        return {
+          user: DEFAULT_USER,
+          professionals: INITIAL_PROFESSIONALS,
+          conversations: INITIAL_CONVERSATIONS,
+          notifications: INITIAL_NOTIFICATIONS
+        };
+      }
+
+      return {
+        user: {
+          ...DEFAULT_USER,
+          ...(saved.user || {})
+        },
+        professionals:
+          saved.professionals?.length
+            ? saved.professionals
+            : INITIAL_PROFESSIONALS,
+        conversations:
+          saved.conversations || INITIAL_CONVERSATIONS,
+        notifications:
+          saved.notifications || INITIAL_NOTIFICATIONS
+      };
+    }
+
+    /* =========================================================
+       ROOT APP
+    ========================================================= */
+
+    function App() {
+      const savedState = useMemo(getInitialState, []);
+
+      const [currentScreen, setCurrentScreen] = useState("splash");
+      const [authMode, setAuthMode] = useState("signup");
+      const [activeTab, setActiveTab] = useState("home");
+      const [viewDeviceFrame, setViewDeviceFrame] = useState(true);
+
+      const [user, setUser] = useState(savedState.user);
+      const [professionals, setProfessionals] = useState(
+        savedState.professionals
+      );
+      const [conversations, setConversations] = useState(
+        savedState.conversations
+      );
+      const [notifications, setNotifications] = useState(
+        savedState.notifications
+      );
+
+      const [selectedProfId, setSelectedProfId] = useState(null);
+      const [activeChatId, setActiveChatId] = useState(null);
+      const [showFilterModal, setShowFilterModal] = useState(false);
+      const [showPremiumModal, setShowPremiumModal] = useState(false);
+      const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+      const [showNotifications, setShowNotifications] = useState(false);
+      const [toastMessage, setToastMessage] = useState("");
+
+      const [searchQuery, setSearchQuery] = useState("");
+      const [filterRole, setFilterRole] = useState("ALL");
+      const [filterLocation, setFilterLocation] = useState("ALL");
+      const [filterExpertise, setFilterExpertise] = useState("ALL");
+
+      /* Splash */
+      useEffect(() => {
+        if (currentScreen === "splash") {
+          const timer = setTimeout(() => {
+            setCurrentScreen("onboarding");
+          }, 1800);
+
+          return () => clearTimeout(timer);
+        }
+      }, [currentScreen]);
+
+      /* Persist */
+      useEffect(() => {
+        saveState({
+          user,
+          professionals,
+          conversations,
+          notifications
+        });
+      }, [
+        user,
+        professionals,
+        conversations,
+        notifications
+      ]);
+
+      /* Toast */
+      const showToast = (message) => {
+        setToastMessage(message);
+
+        window.clearTimeout(window.__realnetToastTimer);
+
+        window.__realnetToastTimer = window.setTimeout(() => {
+          setToastMessage("");
+        }, 2800);
+      };
+
+      /* Search/filter */
+      const filteredProfessionals = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+
+        return professionals.filter((professional) => {
+          const matchesSearch =
+            !query ||
+            professional.name.toLowerCase().includes(query) ||
+            professional.role.toLowerCase().includes(query) ||
+            professional.company.toLowerCase().includes(query) ||
+            professional.location.toLowerCase().includes(query) ||
+            professional.expertise.some((item) =>
+              item.toLowerCase().includes(query)
+            );
+
+          const matchesRole =
+            filterRole === "ALL" ||
+            professional.role === filterRole;
+
+          const matchesLocation =
+            filterLocation === "ALL" ||
+            professional.location === filterLocation;
+
+          const matchesExpertise =
+            filterExpertise === "ALL" ||
+            professional.expertise.includes(filterExpertise);
+
+          return (
+            matchesSearch &&
+            matchesRole &&
+            matchesLocation &&
+            matchesExpertise
+          );
+        });
+      }, [
+        professionals,
+        searchQuery,
+        filterRole,
+        filterLocation,
+        filterExpertise
+      ]);
+
+      const unreadMessagesCount = conversations.filter(
+        (conversation) => conversation.unread
+      ).length;
+
+      const pendingRequestsCount =
+        user.pendingReceivedIds.length;
+
+      const unreadNotifsCount = notifications.filter(
+        (notification) => !notification.read
+      ).length;
+
+      /* =====================================================
+         CONNECTION FLOW
+      ===================================================== */
+
+      const handleConnectAction = (profId) => {
+        if (user.connectedIds.includes(profId)) {
+          return;
+        }
+
+        if (user.pendingSentIds.includes(profId)) {
+          setUser((prev) => ({
+            ...prev,
+            pendingSentIds: prev.pendingSentIds.filter(
+              (id) => id !== profId
+            )
+          }));
+
+          showToast("Connection request withdrawn.");
+          return;
+        }
+
+        setUser((prev) => ({
+          ...prev,
+          pendingSentIds: [
+            ...prev.pendingSentIds,
+            profId
+          ]
+        }));
+
+        showToast("Connection request sent.");
+      };
+
+      const handleAcceptRequest = (profId) => {
+        const professional = professionals.find(
+          (item) => item.id === profId
+        );
+
+        setUser((prev) => ({
+          ...prev,
+          pendingReceivedIds:
+            prev.pendingReceivedIds.filter(
+              (id) => id !== profId
+            ),
+          connectedIds: [
+            ...new Set([
+              ...prev.connectedIds,
+              profId
+            ])
+          ]
+        }));
+
+        setNotifications((prev) =>
+          prev.filter(
+            (notification) =>
+              !(
+                notification.profId === profId &&
+                notification.type === "connection_request"
+              )
+          )
+        );
+
+        showToast(
+          `You are now connected with ${
+            professional?.name || "this professional"
+          }.`
+        );
+      };
+
+      const handleDeclineRequest = (profId) => {
+        setUser((prev) => ({
+          ...prev,
+          pendingReceivedIds:
+            prev.pendingReceivedIds.filter(
+              (id) => id !== profId
+            )
+        }));
+
+        setNotifications((prev) =>
+          prev.filter(
+            (notification) =>
+              !(
+                notification.profId === profId &&
+                notification.type === "connection_request"
+              )
+          )
+        );
+
+        showToast("Connection request declined.");
+      };
+
+      /* =====================================================
+         MESSAGING
+      ===================================================== */
+
+      const handleOpenChatWithProf = (profId) => {
+        let conversation = conversations.find(
+          (item) => item.profId === profId
+        );
+
+        if (!conversation) {
+          const newConversation = {
+            id: `conv-${Date.now()}`,
+            profId,
+            lastMessage:
+              "Connection established. Start the conversation.",
+            timestamp: "Just now",
+            unread: false,
+            messages: []
+          };
+
+          setConversations((prev) => [
+            newConversation,
+            ...prev
+          ]);
+
+          setActiveChatId(newConversation.id);
+        } else {
+          setConversations((prev) =>
+            prev.map((item) =>
+              item.id === conversation.id
+                ? {
+                    ...item,
+                    unread: false
+                  }
+                : item
+            )
+          );
+
+          setActiveChatId(conversation.id);
+        }
+
+        setActiveTab("messages");
+        setSelectedProfId(null);
+      };
+
+      const handleSendMessage = (chatId, text) => {
+        const cleanText = text.trim();
+
+        if (!cleanText) {
+          return;
+        }
+
+        const currentTime = new Date().toLocaleTimeString(
+          [],
+          {
+            hour: "2-digit",
+            minute: "2-digit"
+          }
+        );
+
+        setConversations((prev) =>
+          prev.map((conversation) => {
+            if (conversation.id !== chatId) {
+              return conversation;
+            }
+
+            return {
+              ...conversation,
+              lastMessage: cleanText,
+              timestamp: "Just now",
+              unread: false,
+              messages: [
+                ...conversation.messages,
+                {
+                  id: `m-${Date.now()}`,
+                  sender: "me",
+                  text: cleanText,
+                  time: currentTime
+                }
+              ]
+            };
+          })
+        );
+      };
+
+      /* =====================================================
+         PREMIUM
+      ===================================================== */
+
+      const handleSubscribePro = (plan) => {
+        setUser((prev) => ({
+          ...prev,
+          isPro: true,
+          subscriptionPlan: plan
+        }));
+
+        setShowPremiumModal(false);
+
+        showToast(
+          `REALNET Pro activated with the ${plan} plan.`
+        );
+      };
+
+      /* =====================================================
+         PROFILE
+      ===================================================== */
+
+      const handleProfileSave = (updated) => {
+        setUser((prev) => ({
+          ...prev,
+          ...updated
+        }));
+
+        setShowEditProfileModal(false);
+
+        showToast("Profile updated.");
+      };
+
+      /* =====================================================
+         NOTIFICATIONS
+      ===================================================== */
+
+      const markAllNotificationsRead = () => {
+        setNotifications((prev) =>
+          prev.map((notification) => ({
+            ...notification,
+            read: true
+          }))
+        );
+      };
+
+      /* =====================================================
+         SPLASH
+      ===================================================== */
+
+      if (currentScreen === "splash") {
+        return (
+          <SplashScreen />
+        );
+      }
+
+      /* =====================================================
+         ONBOARDING
+      ===================================================== */
+
+      if (currentScreen === "onboarding") {
+        return (
+          <OnboardingScreen
+            onFinish={() =>
+              setCurrentScreen("auth")
+            }
+          />
+        );
+      }
+
+      /* =====================================================
+         AUTH
+      ===================================================== */
+
+      if (currentScreen === "auth") {
+        return (
+          <AuthScreen
+            mode={authMode}
+            setMode={setAuthMode}
+            onSuccess={(data) => {
+              setUser((prev) => ({
+                ...prev,
+                ...data
+              }));
+
+              setCurrentScreen("role_select");
+            }}
+          />
+        );
+      }
+
+      /* =====================================================
+         ROLE
+      ===================================================== */
+
+      if (currentScreen === "role_select") {
+        return (
+          <RoleSelectScreen
+            selectedRole={user.role}
+            onSelectRole={(role) => {
+              setUser((prev) => ({
+                ...prev,
+                role
+              }));
+
+              setCurrentScreen("profile_setup");
+            }}
+          />
+        );
+      }
+
+      /* =====================================================
+         PROFILE SETUP
+      ===================================================== */
+
+      if (currentScreen === "profile_setup") {
+        return (
+          <ProfileSetupScreen
+            user={user}
+            onSave={(data) => {
+              setUser((prev) => ({
+                ...prev,
+                ...data
+              }));
+
+              setCurrentScreen("app_main");
+
+              showToast(
+                "Profile created. Welcome to REALNET."
+              );
+            }}
+          />
+        );
+      }
+
+      /* =====================================================
+         MAIN APP
+      ===================================================== */
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center">
+          {/* Desktop preview toolbar */}
+          <div className="hidden md:flex w-full max-w-md items-center justify-between bg-slate-900 border-b border-slate-800 px-4 py-2 text-xs">
+            <div className="flex items-center gap-2">
+              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="font-medium text-slate-300">
+                REALNET Prototype
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setViewDeviceFrame((prev) => !prev)
+              }
+              className="text-emerald-400 hover:text-emerald-300"
+            >
+              {viewDeviceFrame
+                ? "Expanded View"
+                : "Phone Frame"}
+            </button>
+          </div>
+
+          <main
+            className={[
+              "relative flex flex-col overflow-hidden bg-slate-900",
+              viewDeviceFrame
+                ? "w-full max-w-md min-h-[844px] md:rounded-2xl md:border md:border-slate-800 md:shadow-2xl"
+                : "w-full max-w-4xl min-h-screen"
+            ].join(" ")}
+          >
+            {/* Toast */}
+            {toastMessage && (
+              <div className="absolute left-4 right-4 top-4 z-[100] animate-slide-up">
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-400/30 bg-emerald-500 px-4 py-3 text-xs font-semibold text-slate-950 shadow-2xl">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 shrink-0" />
+                    <span>{toastMessage}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setToastMessage("")}
+                    aria-label="Close notification"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Page content */}
+            <div className="min-h-0 flex-1 overflow-y-auto pb-20">
+              {selectedProfId ? (
+                <ProfessionalDetailScreen
+                  profId={selectedProfId}
+                  professionals={professionals}
+                  user={user}
+                  onBack={() =>
+                    setSelectedProfId(null)
+                  }
+                  onConnect={() =>
+                    handleConnectAction(selectedProfId)
+                  }
+                  onMessage={() =>
+                    handleOpenChatWithProf(selectedProfId)
+                  }
+                />
+              ) : activeTab === "home" ? (
+                <HomeScreen
+                  user={user}
+                  professionals={professionals}
+                  onSelectProf={setSelectedProfId}
+                  onConnect={handleConnectAction}
+                  onNavigateTab={setActiveTab}
+                  onOpenNotifications={() =>
+                    setShowNotifications(true)
+                  }
+                  unreadNotifs={unreadNotifsCount}
+                  onOpenPro={() =>
+                    setShowPremiumModal(true)
+                  }
+                />
+              ) : activeTab === "discover" ? (
+                <DiscoverScreen
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  professionals={filteredProfessionals}
+                  onSelectProf={setSelectedProfId}
+                  onConnect={handleConnectAction}
+                  user={user}
+                  onOpenFilter={() =>
+                    setShowFilterModal(true)
+                  }
+                  filterRole={filterRole}
+                  filterLocation={filterLocation}
+                />
+              ) : activeTab === "connections" ? (
+                <ConnectionsScreen
+                  user={user}
+                  professionals={professionals}
+                  onSelectProf={setSelectedProfId}
+                  onAccept={handleAcceptRequest}
+                  onDecline={handleDeclineRequest}
+                  onOpenMessage={handleOpenChatWithProf}
+                />
+              ) : activeTab === "messages" ? (
+                <MessagesHubScreen
+                  conversations={conversations}
+                  professionals={professionals}
+                  activeChatId={activeChatId}
+                  setActiveChatId={setActiveChatId}
+                  onSendMessage={handleSendMessage}
+                  onSelectProf={setSelectedProfId}
+                />
+              ) : (
+                <ProfileTabScreen
+                  user={user}
+                  onOpenEdit={() =>
+                    setShowEditProfileModal(true)
+                  }
+                  onOpenPro={() =>
+                    setShowPremiumModal(true)
+                  }
+                  onLogout={() => {
+                    setCurrentScreen("auth");
+                    setActiveTab("home");
+                    setActiveChatId(null);
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Bottom navigation */}
+            {!selectedProfId && !activeChatId && (
+              <nav className="safe-bottom absolute bottom-0 left-0 right-0 z-40 border-t border-slate-800/80 bg-slate-900/95 backdrop-blur-xl">
+                <div className="flex h-16 items-center px-2">
+                  <NavItem
+                    icon={<BuildingIcon className="h-5 w-5" />}
+                    label="Home"
+                    active={activeTab === "home"}
+                    onClick={() =>
+                      setActiveTab("home")
+                    }
+                  />
+
+                  <NavItem
+                    icon={<Search className="h-5 w-5" />}
+                    label="Discover"
+                    active={activeTab === "discover"}
+                    onClick={() =>
+                      setActiveTab("discover")
+                    }
+                  />
+
+                  <NavItem
+                    icon={<Users className="h-5 w-5" />}
+                    label="Connect"
+                    badge={
+                      pendingRequestsCount
+                        ? pendingRequestsCount
+                        : null
+                    }
+                    active={activeTab === "connections"}
+                    onClick={() =>
+                      setActiveTab("connections")
+                    }
+                  />
+
+                  <NavItem
+                    icon={
+                      <MessageSquare className="h-5 w-5" />
+                    }
+                    label="Messages"
+                    badge={
+                      unreadMessagesCount
+                        ? unreadMessagesCount
+                        : null
+                    }
+                    active={activeTab === "messages"}
+                    onClick={() =>
+                      setActiveTab("messages")
+                    }
+                  />
+
+                  <NavItem
+                    icon={<User className="h-5 w-5" />}
+                    label="Profile"
+                    active={activeTab === "profile"}
+                    onClick={() =>
+                      setActiveTab("profile")
+                    }
+                  />
+                </div>
+              </nav>
+            )}
+
+            {/* Filters */}
+            {showFilterModal && (
+              <FilterModal
+                filterRole={filterRole}
+                setFilterRole={setFilterRole}
+                filterLocation={filterLocation}
+                setFilterLocation={setFilterLocation}
+                filterExpertise={filterExpertise}
+                setFilterExpertise={setFilterExpertise}
+                onClose={() =>
+                  setShowFilterModal(false)
+                }
+                onReset={() => {
+                  setFilterRole("ALL");
+                  setFilterLocation("ALL");
+                  setFilterExpertise("ALL");
+                  setSearchQuery("");
+                }}
+              />
+            )}
+
+            {/* Premium */}
+            {showPremiumModal && (
+              <PremiumPaywallModal
+                user={user}
+                onSubscribe={handleSubscribePro}
+                onClose={() =>
+                  setShowPremiumModal(false)
+                }
+              />
+            )}
+
+            {/* Edit profile */}
+            {showEditProfileModal && (
+              <EditProfileModal
+                user={user}
+                onSave={handleProfileSave}
+                onClose={() =>
+                  setShowEditProfileModal(false)
+                }
+              />
+            )}
+
+            {/* Notifications */}
+            {showNotifications && (
+              <NotificationsPanel
+                notifications={notifications}
+                professionals={professionals}
+                onClose={() =>
+                  setShowNotifications(false)
+                }
+                onMarkRead={markAllNotificationsRead}
+                onAccept={handleAcceptRequest}
+              />
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       SPLASH
+    ========================================================= */
+
+    function SplashScreen() {
+      return (
+        <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-6">
+          <div className="flex flex-col items-center text-center animate-fade-in">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-emerald-400/30 bg-gradient-to-br from-emerald-500 to-teal-400 shadow-2xl shadow-emerald-500/10">
+              <BuildingIcon className="h-10 w-10 text-slate-950 stroke-[2.5]" />
+            </div>
+
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              REALNET
+            </h1>
+
+            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.28em] text-emerald-400">
+              Real Estate Networking
+            </p>
+
+            <div className="mt-8 flex items-center gap-2 text-xs text-slate-500">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              Preparing your network
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       ONBOARDING
+    ========================================================= */
+
+    function OnboardingScreen({ onFinish }) {
+      const [step, setStep] = useState(0);
+
+      const slides = [
+        {
+          title: "Meet the Right People in Real Estate",
+          desc:
+            "Discover Realtors, lenders, brokers, investors, contractors, and other professionals in your network.",
+          icon: <Users className="h-12 w-12 text-emerald-400" />
+        },
+        {
+          title: "Build Valuable Professional Connections",
+          desc:
+            "Find relevant professionals, send connection requests, and create relationships around real estate.",
+          icon: <Briefcase className="h-12 w-12 text-teal-400" />
+        },
+        {
+          title: "Grow Your Real-Estate Network",
+          desc:
+            "Keep your professional relationships organized and communicate directly inside the platform.",
+          icon: <Zap className="h-12 w-12 text-amber-400" />
+        }
+      ];
+
+      const current = slides[step];
+
+      return (
+        <div className="min-h-screen bg-slate-900 px-6 py-6 text-white">
+          <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md flex-col justify-between">
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                REALNET
+              </span>
+
+              <button
+                type="button"
+                onClick={onFinish}
+                className="text-xs font-medium text-slate-400 hover:text-white"
+              >
+                Skip
+              </button>
+            </div>
+
+            <div className="my-auto px-4 text-center">
+              <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-3xl border border-slate-700 bg-slate-800 shadow-xl">
+                {current.icon}
+              </div>
+
+              <h2 className="text-2xl font-bold text-slate-100">
+                {current.title}
+              </h2>
+
+              <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-400">
+                {current.desc}
+              </p>
+            </div>
+
+            <div className="pb-2">
+              <div className="mb-8 flex justify-center gap-2">
+                {slides.map((_, index) => (
+                  <div
+                    key={index}
+                    className={[
+                      "h-1.5 rounded-full transition-all duration-300",
+                      index === step
+                        ? "w-8 bg-emerald-500"
+                        : "w-2 bg-slate-700"
+                    ].join(" ")}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (step < slides.length - 1) {
+                    setStep((prev) => prev + 1);
+                  } else {
+                    onFinish();
+                  }
+                }}
+                className="flex w-full items-center justify-center rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400"
+              >
+                {step === slides.length - 1
+                  ? "Get Started"
+                  : "Continue"}
+
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       AUTH
+    ========================================================= */
+
+    function AuthScreen({
+      mode,
+      setMode,
+      onSuccess
+    }) {
+      const [email, setEmail] = useState(
+        "alex.vance@example.com"
+      );
+      const [password, setPassword] = useState(
+        "password123"
+      );
+      const [name, setName] = useState("Alex Vance");
+      const [error, setError] = useState("");
+
+      const handleSubmit = () => {
+        if (!email.trim() || !password.trim()) {
+          setError("Please complete all required fields.");
+          return;
+        }
+
+        if (
+          mode === "signup" &&
+          !name.trim()
+        ) {
+          setError("Please enter your full name.");
+          return;
+        }
+
+        setError("");
+
+        onSuccess({
+          name:
+            mode === "signup"
+              ? name.trim()
+              : "Alex Vance",
+          email: email.trim()
+        });
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-900 px-6 py-6 text-slate-100">
+          <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md flex-col justify-between">
+            <div className="pt-4">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+                <BuildingIcon className="h-6 w-6 text-emerald-400" />
+              </div>
+
+              <h2 className="text-2xl font-bold text-white">
+                {mode === "signup"
+                  ? "Create Account"
+                  : "Welcome Back"}
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-400">
+                {mode === "signup"
+                  ? "Create your professional REALNET profile."
+                  : "Sign in to access your professional network."}
+              </p>
+
+              <div className="my-6 flex rounded-xl border border-slate-700/60 bg-slate-800 p-1">
+                <button
+                  type="button"
+                  onClick={() => setMode("signup")}
+                  className={[
+                    "flex-1 rounded-lg py-2 text-xs font-semibold transition",
+                    mode === "signup"
+                      ? "bg-emerald-500 text-slate-950"
+                      : "text-slate-400 hover:text-white"
+                  ].join(" ")}
+                >
+                  Sign Up
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className={[
+                    "flex-1 rounded-lg py-2 text-xs font-semibold transition",
+                    mode === "login"
+                      ? "bg-emerald-500 text-slate-950"
+                      : "text-slate-400 hover:text-white"
+                  ].join(" ")}
+                >
+                  Log In
+                </button>
+              </div>
+
+              {error && (
+                <div className="mb-4 rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {mode === "signup" && (
+                  <Field
+                    label="Full Name"
+                    value={name}
+                    onChange={setName}
+                    placeholder="Jane Doe"
+                  />
+                )}
+
+                <Field
+                  label="Email Address"
+                  type="email"
+                  value={email}
+                  onChange={setEmail}
+                  placeholder="name@domain.com"
+                />
+
+                <Field
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="••••••••"
+                />
+
+                {mode === "login" && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      className="text-xs text-emerald-400 hover:text-emerald-300"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="pb-2">
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400"
+              >
+                {mode === "signup"
+                  ? "Continue"
+                  : "Sign In"}
+              </button>
+
+              <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-500">
+                By continuing, you agree to REALNET's
+                Professional Terms and Privacy Policy.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       ROLE SELECT
+    ========================================================= */
+
+    function RoleSelectScreen({
+      selectedRole,
+      onSelectRole
+    }) {
+      const roles = [
+        {
+          id: "REALTOR",
+          label: "Realtor / Agent",
+          icon: "🏡",
+          desc: "Residential and commercial agents"
+        },
+        {
+          id: "BROKER",
+          label: "Broker / Brokerage",
+          icon: "🏢",
+          desc: "Brokerage owners and managing brokers"
+        },
+        {
+          id: "INVESTOR",
+          label: "Real Estate Investor",
+          icon: "📈",
+          desc: "Investors, syndicators, and buyers"
+        },
+        {
+          id: "LENDER",
+          label: "Lender / Mortgage",
+          icon: "💳",
+          desc: "Mortgage brokers and private lenders"
+        },
+        {
+          id: "PROPERTY MANAGER",
+          label: "Property Manager",
+          icon: "🔑",
+          desc: "Leasing and property operations"
+        },
+        {
+          id: "CONTRACTOR",
+          label: "Contractor / Vendor",
+          icon: "🔨",
+          desc: "Construction and renovation professionals"
+        },
+        {
+          id: "DEVELOPER",
+          label: "Property Developer",
+          icon: "🏗️",
+          desc: "Development and building professionals"
+        },
+        {
+          id: "OTHER",
+          label: "Other Real Estate Role",
+          icon: "🌐",
+          desc: "Other relevant ecosystem professionals"
+        }
+      ];
+
+      return (
+        <div className="min-h-screen bg-slate-900 px-6 py-6 text-slate-100">
+          <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                Step 1 of 2
+              </span>
+
+              <h2 className="mt-1 text-2xl font-bold text-white">
+                Select Your Role
+              </h2>
+
+              <p className="mb-6 mt-2 text-xs text-slate-400">
+                Choose the role that best represents your
+                professional identity.
+              </p>
+
+              <div className="max-h-[500px] space-y-2.5 overflow-y-auto pr-1">
+                {roles.map((role) => {
+                  const selected =
+                    selectedRole === role.id;
+
+                  return (
+                    <button
+                      type="button"
+                      key={role.id}
+                      onClick={() =>
+                        onSelectRole(role.id)
+                      }
+                      className={[
+                        "flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition",
+                        selected
+                          ? "border-emerald-500 bg-emerald-500/10"
+                          : "border-slate-700/60 bg-slate-800/60 hover:border-slate-600"
+                      ].join(" ")}
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="text-2xl">
+                          {role.icon}
+                        </span>
+
+                        <span>
+                          <span className="block text-sm font-semibold text-white">
+                            {role.label}
+                          </span>
+
+                          <span className="mt-0.5 block text-[11px] text-slate-400">
+                            {role.desc}
+                          </span>
+                        </span>
+                      </span>
+
+                      {selected && (
+                        <Check className="h-5 w-5 shrink-0 text-emerald-400" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-5">
+              <button
+                type="button"
+                onClick={() =>
+                  onSelectRole(
+                    selectedRole || "REALTOR"
+                  )
+                }
+                className="w-full rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400"
+              >
+                Continue to Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       PROFILE SETUP
+    ========================================================= */
+
+    function ProfileSetupScreen({
+      user,
+      onSave
+    }) {
+      const [formData, setFormData] = useState({
+        company: user.company || "",
+        location: user.location || "Elyria, OH",
+        bio: user.bio || "",
+        expertiseStr:
+          user.expertise?.join(", ") ||
+          "Residential, Investment"
+      });
+
+      const handleSave = () => {
+        const expertise =
+          formData.expertiseStr
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+
+        onSave({
+          company: formData.company.trim(),
+          location: formData.location.trim(),
+          bio: formData.bio.trim(),
+          expertise
+        });
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-900 px-6 py-6 text-slate-100">
+          <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                Step 2 of 2
+              </span>
+
+              <h2 className="mt-1 text-2xl font-bold text-white">
+                Professional Profile
+              </h2>
+
+              <p className="mb-6 mt-2 text-xs text-slate-400">
+                Complete the information other professionals
+                will see when they discover you.
+              </p>
+
+              <div className="space-y-4">
+                <Field
+                  label="Company / Brokerage / Firm"
+                  value={formData.company}
+                  onChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      company: value
+                    }))
+                  }
+                  placeholder="Apex Realty Group"
+                />
+
+                <Field
+                  label="Location"
+                  value={formData.location}
+                  onChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      location: value
+                    }))
+                  }
+                  placeholder="Elyria, OH"
+                />
+
+                <TextareaField
+                  label="Professional Bio"
+                  value={formData.bio}
+                  onChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      bio: value
+                    }))
+                  }
+                  placeholder="Describe your focus, services, or investment interests."
+                />
+
+                <Field
+                  label="Specialties"
+                  value={formData.expertiseStr}
+                  onChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      expertiseStr: value
+                    }))
+                  }
+                  placeholder="Commercial, Investment, Multifamily"
+                />
+              </div>
+            </div>
+
+            <div className="pt-6">
+              <button
+                type="button"
+                onClick={handleSave}
+                className="w-full rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400"
+              >
+                Complete Profile & Enter REALNET
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       HOME
+    ========================================================= */
+
+    function HomeScreen({
+      user,
+      professionals,
+      onSelectProf,
+      onConnect,
+      onNavigateTab,
+      onOpenNotifications,
+      unreadNotifs,
+      onOpenPro
+    }) {
+      const recommended =
+        professionals.slice(0, 3);
+
+      const featured =
+        professionals.filter(
+          (professional) =>
+            professional.isFeatured
+        );
+
+      return (
+        <div className="space-y-6 p-4 animate-slide-up">
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-3">
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="h-10 w-10 rounded-full border border-emerald-500/50 object-cover"
+              />
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-white">
+                    {user.name}
+                  </h2>
+
+                  {user.isPro && (
+                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold text-amber-400">
+                      PRO
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-[11px] text-slate-400">
+                  {user.role} · {user.location}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onOpenNotifications}
+              className="relative rounded-xl border border-slate-700/60 bg-slate-800/80 p-2.5 transition hover:bg-slate-700"
+              aria-label="Open notifications"
+            >
+              <Bell className="h-5 w-5 text-slate-300" />
+
+              {unreadNotifs > 0 && (
+                <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
+              )}
+            </button>
+          </div>
+
+          {!user.isPro && (
+            <button
+              type="button"
+              onClick={onOpenPro}
+              className="flex w-full items-center justify-between rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950 via-slate-800 to-slate-900 p-4 text-left transition hover:border-emerald-500/60"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+                  <Crown className="h-5 w-5 text-emerald-400" />
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-white">
+                    Unlock REALNET Pro
+                  </p>
+
+                  <p className="mt-0.5 text-[11px] text-slate-400">
+                    Advanced networking tools and visibility
+                  </p>
+                </div>
+              </div>
+
+              <ChevronRight className="h-5 w-5 text-emerald-400" />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() =>
+              onNavigateTab("discover")
+            }
+            className="flex w-full items-center justify-between rounded-xl border border-slate-700/80 bg-slate-800/80 p-3 text-left"
+          >
+            <span className="flex items-center text-xs text-slate-400">
+              <Search className="mr-2 h-4 w-4" />
+              Search realtors, lenders, investors...
+            </span>
+
+            <Sliders className="h-4 w-4 text-emerald-400" />
+          </button>
+
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                Recommended For You
+              </h3>
+
+              <button
+                type="button"
+                onClick={() =>
+                  onNavigateTab("discover")
+                }
+                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+              >
+                See All
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {recommended.map((professional) => (
+                <ProfessionalCard
+                  key={professional.id}
+                  prof={professional}
+                  user={user}
+                  onSelect={() =>
+                    onSelectProf(professional.id)
+                  }
+                  onConnect={() =>
+                    onConnect(professional.id)
+                  }
+                />
+              ))}
+            </div>
+          </section>
+
+          <div className="flex items-center justify-between rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-3">
+            <div className="flex items-center gap-2">
+              <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[9px] font-bold uppercase text-slate-300">
+                Ad
+              </span>
+
+              <span className="text-xs font-medium text-slate-300">
+                Lorain County Title & Closing Services
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className="flex items-center text-[11px] text-emerald-400"
+            >
+              Learn More
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </button>
+          </div>
+
+          <section className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              Featured Professionals
+            </h3>
+
+            <div className="scrollbar-none flex gap-3 overflow-x-auto pb-1">
+              {featured.map((professional) => (
+                <button
+                  type="button"
+                  key={professional.id}
+                  onClick={() =>
+                    onSelectProf(professional.id)
+                  }
+                  className="min-w-[180px] rounded-xl border border-slate-700/70 bg-slate-800/70 p-3 text-center transition hover:border-slate-600"
+                >
+                  <img
+                    src={professional.avatar}
+                    alt={professional.name}
+                    className="mx-auto mb-2 h-14 w-14 rounded-full border border-slate-600 object-cover"
+                  />
+
+                  <p className="line-clamp-1 text-xs font-bold text-white">
+                    {professional.name}
+                  </p>
+
+                  <p className="text-[10px] font-semibold text-emerald-400">
+                    {professional.role}
+                  </p>
+
+                  <p className="line-clamp-1 text-[10px] text-slate-400">
+                    {professional.company}
+                  </p>
+
+                  <span className="mt-2 flex items-center justify-center text-[10px] text-slate-500">
+                    <MapPin className="mr-0.5 h-3 w-3" />
+                    {professional.location}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       DISCOVER
+    ========================================================= */
+
+    function DiscoverScreen({
+      searchQuery,
+      setSearchQuery,
+      professionals,
+      onSelectProf,
+      onConnect,
+      user,
+      onOpenFilter,
+      filterRole,
+      filterLocation
+    }) {
+      return (
+        <div className="space-y-4 p-4 animate-slide-up">
+          <div className="flex items-center justify-between pt-2">
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                Discover
+              </h2>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                Find relevant real-estate professionals
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onOpenFilter}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-emerald-400"
+            >
+              <Filter className="h-3.5 w-3.5" />
+              Filters
+
+              {(filterRole !== "ALL" ||
+                filterLocation !== "ALL") && (
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              )}
+            </button>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(event) =>
+                setSearchQuery(event.target.value)
+              }
+              placeholder="Search by name, role, firm, city..."
+              className="w-full rounded-xl border border-slate-700 bg-slate-800/90 py-2.5 pl-10 pr-10 text-xs text-white outline-none placeholder:text-slate-500 focus:border-emerald-500"
+            />
+
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-3 text-slate-400 hover:text-white"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {(filterRole !== "ALL" ||
+            filterLocation !== "ALL") && (
+            <div className="flex flex-wrap gap-2">
+              {filterRole !== "ALL" && (
+                <span className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[10px] text-emerald-400">
+                  Role: {filterRole}
+                </span>
+              )}
+
+              {filterLocation !== "ALL" && (
+                <span className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-[10px] text-emerald-400">
+                  Location: {filterLocation}
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="text-xs text-slate-500">
+            Showing {professionals.length} professionals
+          </div>
+
+          <div className="space-y-3">
+            {professionals.length === 0 ? (
+              <EmptyState
+                icon={<Users className="h-8 w-8" />}
+                title="No professionals found"
+                description="Try a different search or remove a filter."
+              />
+            ) : (
+              professionals.map((professional) => (
+                <ProfessionalCard
+                  key={professional.id}
+                  prof={professional}
+                  user={user}
+                  onSelect={() =>
+                    onSelectProf(professional.id)
+                  }
+                  onConnect={() =>
+                    onConnect(professional.id)
+                  }
+                />
+              ))
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       CONNECTIONS
+    ========================================================= */
+
+    function ConnectionsScreen({
+      user,
+      professionals,
+      onSelectProf,
+      onAccept,
+      onDecline,
+      onOpenMessage
+    }) {
+      const [tab, setTab] = useState("active");
+
+      const myConnections =
+        professionals.filter((professional) =>
+          user.connectedIds.includes(
+            professional.id
+          )
+        );
+
+      const pendingRequests =
+        professionals.filter((professional) =>
+          user.pendingReceivedIds.includes(
+            professional.id
+          )
+        );
+
+      return (
+        <div className="space-y-4 p-4 animate-slide-up">
+          <div className="pt-2">
+            <h2 className="text-lg font-bold text-white">
+              Network Center
+            </h2>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              Manage your professional relationships
+            </p>
+          </div>
+
+          <div className="flex rounded-xl border border-slate-700/60 bg-slate-800 p-1">
+            <button
+              type="button"
+              onClick={() => setTab("active")}
+              className={[
+                "flex-1 rounded-lg py-2 text-xs font-semibold transition",
+                tab === "active"
+                  ? "bg-emerald-500 text-slate-950"
+                  : "text-slate-400"
+              ].join(" ")}
+            >
+              Connections ({myConnections.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTab("requests")}
+              className={[
+                "relative flex-1 rounded-lg py-2 text-xs font-semibold transition",
+                tab === "requests"
+                  ? "bg-emerald-500 text-slate-950"
+                  : "text-slate-400"
+              ].join(" ")}
+            >
+              Requests ({pendingRequests.length})
+
+              {pendingRequests.length > 0 && (
+                <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-amber-400" />
+              )}
+            </button>
+          </div>
+
+          {tab === "active" ? (
+            myConnections.length === 0 ? (
+              <EmptyState
+                icon={<Users className="h-8 w-8" />}
+                title="No active connections"
+                description="Discover professionals and start building your network."
+              />
+            ) : (
+              <div className="space-y-3">
+                {myConnections.map((professional) => (
+                  <div
+                    key={professional.id}
+                    className="flex items-center justify-between rounded-xl border border-slate-700/60 bg-slate-800/70 p-3.5"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onSelectProf(
+                          professional.id
+                        )
+                      }
+                      className="flex min-w-0 items-center gap-3 text-left"
+                    >
+                      <img
+                        src={professional.avatar}
+                        alt={professional.name}
+                        className="h-11 w-11 rounded-full border border-slate-600 object-cover"
+                      />
+
+                      <div className="min-w-0">
+                        <h4 className="truncate text-xs font-bold text-white">
+                          {professional.name}
+                        </h4>
+
+                        <p className="text-[11px] font-medium text-emerald-400">
+                          {professional.role}
+                        </p>
+
+                        <p className="truncate text-[10px] text-slate-400">
+                          {professional.company}
+                        </p>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onOpenMessage(
+                          professional.id
+                        )
+                      }
+                      className="rounded-lg bg-slate-700 p-2 text-emerald-400 transition hover:bg-slate-600"
+                      aria-label={`Message ${professional.name}`}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : pendingRequests.length === 0 ? (
+            <EmptyState
+              icon={<CheckCircle className="h-8 w-8" />}
+              title="No pending requests"
+              description="You're caught up."
+            />
+          ) : (
+            <div className="space-y-3">
+              {pendingRequests.map((professional) => (
+                <div
+                  key={professional.id}
+                  className="space-y-3 rounded-xl border border-slate-700 bg-slate-800/80 p-3.5"
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onSelectProf(
+                        professional.id
+                      )
+                    }
+                    className="flex w-full items-center gap-3 text-left"
+                  >
+                    <img
+                      src={professional.avatar}
+                      alt={professional.name}
+                      className="h-11 w-11 rounded-full border border-slate-600 object-cover"
+                    />
+
+                    <div>
+                      <h4 className="text-xs font-bold text-white">
+                        {professional.name}
+                      </h4>
+
+                      <p className="text-[11px] font-medium text-emerald-400">
+                        {professional.role}
+                      </p>
+
+                      <p className="text-[10px] text-slate-400">
+                        {professional.company} ·{" "}
+                        {professional.location}
+                      </p>
+                    </div>
+                  </button>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onAccept(
+                          professional.id
+                        )
+                      }
+                      className="flex-1 rounded-lg bg-emerald-500 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-400"
+                    >
+                      Accept
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onDecline(
+                          professional.id
+                        )
+                      }
+                      className="flex-1 rounded-lg bg-slate-700 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-600"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* =========================================================
+       MESSAGES
+    ========================================================= */
+
+    function MessagesHubScreen({
+      conversations,
+      professionals,
+      activeChatId,
+      setActiveChatId,
+      onSendMessage,
+      onSelectProf
+    }) {
+      const [inputText, setInputText] =
+        useState("");
+
+      const activeConversation =
+        conversations.find(
+          (conversation) =>
+            conversation.id === activeChatId
+        );
+
+      const activeProfessional =
+        activeConversation
+          ? professionals.find(
+              (professional) =>
+                professional.id ===
+                activeConversation.profId
+            )
+          : null;
+
+      if (activeChatId) {
+        return (
+          <div className="flex h-[calc(100vh-4rem)] min-h-[700px] flex-col bg-slate-900">
+            <div className="flex items-center gap-3 border-b border-slate-700/80 bg-slate-800 p-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setActiveChatId(null)
+                }
+                className="rounded-lg p-1 text-slate-400 hover:text-white"
+                aria-label="Back to messages"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+
+              {activeProfessional && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSelectProf(
+                      activeProfessional.id
+                    )
+                  }
+                  className="flex items-center gap-2.5 text-left"
+                >
+                  <img
+                    src={activeProfessional.avatar}
+                    alt={activeProfessional.name}
+                    className="h-9 w-9 rounded-full border border-slate-600 object-cover"
+                  />
+
+                  <div>
+                    <h4 className="text-xs font-bold text-white">
+                      {activeProfessional.name}
+                    </h4>
+
+                    <p className="text-[10px] text-emerald-400">
+                      {activeProfessional.role} ·{" "}
+                      {activeProfessional.company}
+                    </p>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            <div className="flex-1 space-y-3 overflow-y-auto p-4">
+              {activeConversation?.messages?.length === 0 ? (
+                <div className="flex min-h-full items-center justify-center">
+                  <div className="max-w-xs text-center">
+                    <MessageSquare className="mx-auto mb-3 h-9 w-9 text-slate-600" />
+                    <p className="text-sm font-semibold text-slate-300">
+                      Start the conversation
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                      Introduce yourself and explain what
+                      you're looking to connect about.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                activeConversation?.messages?.map(
+                  (message) => {
+                    const isMe =
+                      message.sender === "me";
+
+                    return (
+                      <div
+                        key={message.id}
+                        className={[
+                          "flex flex-col",
+                          isMe
+                            ? "items-end"
+                            : "items-start"
+                        ].join(" ")}
+                      >
+                        <div
+                          className={[
+                            "max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed",
+                            isMe
+                              ? "rounded-br-sm bg-emerald-500 font-medium text-slate-950"
+                              : "rounded-bl-sm border border-slate-700/80 bg-slate-800 text-slate-100"
+                          ].join(" ")}
+                        >
+                          {message.text}
+                        </div>
+
+                        <span className="mt-1 px-1 text-[9px] text-slate-500">
+                          {message.time}
+                        </span>
+                      </div>
+                    );
+                  }
+                )
+              )}
+            </div>
+
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+
+                onSendMessage(
+                  activeChatId,
+                  inputText
+                );
+
+                setInputText("");
+              }}
+              className="border-t border-slate-700/80 bg-slate-800 p-3"
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(event) =>
+                    setInputText(event.target.value)
+                  }
+                  placeholder="Type a message..."
+                  className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2.5 text-xs text-white outline-none placeholder:text-slate-500 focus:border-emerald-500"
+                />
+
+                <button
+                  type="submit"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 transition hover:bg-emerald-400"
+                  aria-label="Send message"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </form>
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-4 p-4 animate-slide-up">
+          <div className="pt-2">
+            <h2 className="text-lg font-bold text-white">
+              Messages
+            </h2>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              Communicate with your professional network
+            </p>
+          </div>
+
+          {conversations.length === 0 ? (
+            <EmptyState
+              icon={<MessageSquare className="h-8 w-8" />}
+              title="No conversations"
+              description="Connect with professionals to start messaging."
+            />
+          ) : (
+            <div className="space-y-2">
+              {conversations.map((conversation) => {
+                const professional =
+                  professionals.find(
+                    (item) =>
+                      item.id ===
+                      conversation.profId
+                  );
+
+                if (!professional) {
+                  return null;
+                }
+
+                return (
+                  <button
+                    type="button"
+                    key={conversation.id}
+                    onClick={() =>
+                      setActiveChatId(
+                        conversation.id
+                      )
+                    }
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-700/60 bg-slate-800/70 p-3.5 text-left transition hover:bg-slate-800"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <img
+                        src={professional.avatar}
+                        alt={professional.name}
+                        className="h-11 w-11 rounded-full border border-slate-600 object-cover"
+                      />
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="truncate text-xs font-bold text-white">
+                            {professional.name}
+                          </h4>
+
+                          <span className="shrink-0 text-[10px] text-slate-500">
+                            {conversation.timestamp}
+                          </span>
+                        </div>
+
+                        <p className="mt-1 line-clamp-1 text-[11px] text-slate-400">
+                          {conversation.lastMessage}
+                        </p>
+                      </div>
+                    </div>
+
+                    {conversation.unread && (
+                      <span className="ml-2 h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* =========================================================
+       PROFESSIONAL DETAIL
+    ========================================================= */
+
+    function ProfessionalDetailScreen({
+      profId,
+      professionals,
+      user,
+      onBack,
+      onConnect,
+      onMessage
+    }) {
+      const professional =
+        professionals.find(
+          (item) => item.id === profId
+        );
+
+      if (!professional) {
+        return null;
+      }
+
+      const isConnected =
+        user.connectedIds.includes(
+          professional.id
+        );
+
+      const isPending =
+        user.pendingSentIds.includes(
+          professional.id
+        );
+
+      return (
+        <div className="space-y-6 bg-slate-900 p-4 animate-slide-up">
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={onBack}
+              className="rounded-xl bg-slate-800 p-2 text-slate-300 hover:text-white"
+              aria-label="Back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              Professional Profile
+            </span>
+
+            <div className="w-9" />
+          </div>
+
+          <div className="text-center">
+            <div className="relative mx-auto mb-3 w-fit">
+              <img
+                src={professional.avatar}
+                alt={professional.name}
+                className="h-24 w-24 rounded-full border-2 border-emerald-500/80 object-cover shadow-xl"
+              />
+
+              {professional.verified && (
+                <div className="absolute bottom-0 right-0 rounded-full border-2 border-slate-900 bg-emerald-500 p-1 text-slate-950">
+                  <CheckCircle className="h-4 w-4" />
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-xl font-bold text-white">
+              {professional.name}
+            </h2>
+
+            <span className="mt-1 inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-400">
+              {professional.role}
+            </span>
+
+            <p className="mt-2 text-xs font-medium text-slate-300">
+              {professional.company}
+            </p>
+
+            <p className="mt-1 flex items-center justify-center text-xs text-slate-400">
+              <MapPin className="mr-1 h-3.5 w-3.5 text-slate-500" />
+              {professional.location}
+            </p>
+
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={onConnect}
+                className={[
+                  "flex-1 rounded-xl py-3 text-xs font-bold transition",
+                  isConnected
+                    ? "border border-slate-700 bg-slate-800 text-emerald-400"
+                    : isPending
+                    ? "border border-amber-500/30 bg-amber-500/10 text-amber-400"
+                    : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+                ].join(" ")}
+              >
+                {isConnected
+                  ? "Connected"
+                  : isPending
+                  ? "Request Pending"
+                  : "+ Connect"}
+              </button>
+
+              {isConnected && (
+                <button
+                  type="button"
+                  onClick={onMessage}
+                  className="flex-1 rounded-xl border border-slate-700 bg-slate-800 py-3 text-xs font-bold text-white transition hover:bg-slate-700"
+                >
+                  <span className="flex items-center justify-center">
+                    <MessageSquare className="mr-1.5 h-4 w-4 text-emerald-400" />
+                    Message
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <section className="rounded-xl border border-slate-700/60 bg-slate-800/60 p-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              About & Focus
+            </h4>
+
+            <p className="mt-2 text-xs leading-relaxed text-slate-300">
+              {professional.bio}
+            </p>
+          </section>
+
+          <section>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              Areas of Expertise
+            </h4>
+
+            <div className="mt-2 flex flex-wrap gap-2">
+              {professional.expertise.map(
+                (expertise) => (
+                  <span
+                    key={expertise}
+                    className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1 text-xs text-slate-300"
+                  >
+                    {expertise}
+                  </span>
+                )
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-slate-700/60 bg-slate-800/60 p-4">
+            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-300">
+              Professional Information
+            </h4>
+
+            <InfoRow
+              label="Connections"
+              value={professional.connectionsCount}
+            />
+
+            <InfoRow
+              label="Contact Preference"
+              value={professional.contactPref}
+            />
+
+            <InfoRow
+              label="Professional ID"
+              value={professional.license}
+              last
+            />
+          </section>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       PROFILE TAB
+    ========================================================= */
+
+    function ProfileTabScreen({
+      user,
+      onOpenEdit,
+      onOpenPro,
+      onLogout
+    }) {
+      return (
+        <div className="space-y-6 p-4 animate-slide-up">
+          <div className="flex items-center justify-between pt-2">
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                My Profile
+              </h2>
+
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                Your professional identity
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onOpenEdit}
+              className="rounded-xl border border-slate-700 bg-slate-800 p-2 text-slate-300 hover:text-white"
+              aria-label="Edit profile"
+            >
+              <Edit3 className="h-4 w-4 text-emerald-400" />
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-slate-700/70 bg-slate-800/70 p-5 text-center">
+            <img
+              src={user.avatar}
+              alt={user.name}
+              className="mx-auto mb-3 h-20 w-20 rounded-full border-2 border-emerald-500 object-cover"
+            />
+
+            <h3 className="text-base font-bold text-white">
+              {user.name}
+            </h3>
+
+            <p className="text-xs font-bold text-emerald-400">
+              {user.role}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-400">
+              {user.company} · {user.location}
+            </p>
+
+            <div className="mx-auto my-4 flex max-w-[240px] justify-center divide-x divide-slate-800 rounded-xl border border-slate-800 bg-slate-900/60 py-3">
+              <div className="w-1/2">
+                <p className="text-sm font-bold text-white">
+                  {user.connectedIds.length}
+                </p>
+                <p className="text-[10px] text-slate-400">
+                  Connections
+                </p>
+              </div>
+
+              <div className="w-1/2">
+                <p className="text-sm font-bold text-emerald-400">
+                  {user.isPro ? "Pro" : "Free"}
+                </p>
+
+                <p className="text-[10px] text-slate-400">
+                  Membership
+                </p>
+              </div>
+            </div>
+
+            {!user.isPro && (
+              <button
+                type="button"
+                onClick={onOpenPro}
+                className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 py-2.5 text-xs font-bold text-slate-950"
+              >
+                Upgrade to REALNET Pro
+              </button>
+            )}
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-800/60">
+            <SettingsRow
+              icon={<User className="h-4 w-4" />}
+              label="Account Settings"
+            />
+
+            <SettingsRow
+              icon={<Bell className="h-4 w-4" />}
+              label="Push Notifications"
+            />
+
+            <SettingsRow
+              icon={<Lock className="h-4 w-4" />}
+              label="Privacy & Verification"
+            />
+
+            <SettingsRow
+              icon={<CreditCard className="h-4 w-4" />}
+              label="Subscription & Billing"
+              onClick={onOpenPro}
+              accent
+            />
+
+            <SettingsRow
+              icon={<LogOut className="h-4 w-4" />}
+              label="Log Out"
+              onClick={onLogout}
+              danger
+              last
+            />
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       PREMIUM
+    ========================================================= */
+
+    function PremiumPaywallModal({
+      user,
+      onSubscribe,
+      onClose
+    }) {
+      const [selectedPlan, setSelectedPlan] =
+        useState("annual");
+
+      return (
+        <ModalOverlay onClose={onClose}>
+          <div className="w-full max-w-sm rounded-2xl border border-slate-700/80 bg-slate-900 p-5 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10">
+                  <Crown className="h-6 w-6 text-amber-400" />
+                </div>
+
+                <h3 className="text-lg font-extrabold text-white">
+                  REALNET PRO
+                </h3>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  More tools for building your professional network
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-2">
+              {[
+                "Expanded networking access",
+                "Advanced discovery filters",
+                "Featured profile placement",
+                "Ad-free experience"
+              ].map((benefit) => (
+                <div
+                  key={benefit}
+                  className="flex items-start gap-2 text-xs text-slate-300"
+                >
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                  <span>{benefit}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 space-y-2">
+              <PlanCard
+                selected={selectedPlan === "annual"}
+                onClick={() =>
+                  setSelectedPlan("annual")
+                }
+                title="Annual"
+                subtitle="$119.99 / year"
+                detail="Best for long-term professional networking"
+              />
+
+              <PlanCard
+                selected={selectedPlan === "monthly"}
+                onClick={() =>
+                  setSelectedPlan("monthly")
+                }
+                title="Monthly"
+                subtitle="$14.99 / month"
+                detail="Flexible monthly membership"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                onSubscribe(selectedPlan)
+              }
+              className="mt-5 w-full rounded-xl bg-emerald-500 py-3.5 text-xs font-extrabold text-slate-950 transition hover:bg-emerald-400"
+            >
+              {user.isPro
+                ? "Membership Active"
+                : "Start 7-Day Free Trial"}
+            </button>
+
+            <p className="mt-3 text-center text-[10px] text-slate-500">
+              Prototype billing flow. Connect to a real
+              payment provider for production.
+            </p>
+          </div>
+        </ModalOverlay>
+      );
+    }
+
+    /* =========================================================
+       FILTER MODAL
+    ========================================================= */
+
+    function FilterModal({
+      filterRole,
+      setFilterRole,
+      filterLocation,
+      setFilterLocation,
+      filterExpertise,
+      setFilterExpertise,
+      onClose,
+      onReset
+    }) {
+      const roles = [
+        "ALL",
+        "REALTOR",
+        "BROKER",
+        "INVESTOR",
+        "LENDER",
+        "PROPERTY MANAGER",
+        "CONTRACTOR",
+        "DEVELOPER"
+      ];
+
+      const locations = [
+        "ALL",
+        "Elyria, OH",
+        "Cleveland, OH",
+        "Akron, OH",
+        "Columbus, OH"
+      ];
+
+      const expertise = [
+        "ALL",
+        "Residential",
+        "Commercial",
+        "Multi-Family",
+        "Mortgage",
+        "Investment",
+        "Property Management",
+        "Renovation"
+      ];
+
+      return (
+        <div className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-sm">
+          <div className="absolute bottom-0 left-0 right-0 mx-auto max-w-md rounded-t-2xl border-t border-slate-700 bg-slate-900 p-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white">
+                Filter Professionals
+              </h3>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <FilterGroup
+              title="Professional Role"
+              items={roles}
+              value={filterRole}
+              onChange={setFilterRole}
+            />
+
+            <FilterGroup
+              title="Location"
+              items={locations}
+              value={filterLocation}
+              onChange={setFilterLocation}
+            />
+
+            <FilterGroup
+              title="Expertise"
+              items={expertise}
+              value={filterExpertise}
+              onChange={setFilterExpertise}
+            />
+
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={onReset}
+                className="flex-1 rounded-xl border border-slate-700 bg-slate-800 py-3 text-xs font-semibold text-slate-300 hover:bg-slate-700"
+              >
+                Reset
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 rounded-xl bg-emerald-500 py-3 text-xs font-bold text-slate-950 hover:bg-emerald-400"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       EDIT PROFILE
+    ========================================================= */
+
+    function EditProfileModal({
+      user,
+      onSave,
+      onClose
+    }) {
+      const [formData, setFormData] =
+        useState({
+          company: user.company || "",
+          location: user.location || "",
+          bio: user.bio || ""
+        });
+
+      return (
+        <ModalOverlay onClose={onClose}>
+          <div className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white">
+                Edit Profile
+              </h3>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <Field
+                label="Company"
+                value={formData.company}
+                onChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    company: value
+                  }))
+                }
+              />
+
+              <Field
+                label="Location"
+                value={formData.location}
+                onChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    location: value
+                  }))
+                }
+              />
+
+              <TextareaField
+                label="Bio"
+                value={formData.bio}
+                onChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    bio: value
+                  }))
+                }
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onSave(formData)}
+              className="mt-5 w-full rounded-xl bg-emerald-500 py-3 text-xs font-bold text-slate-950 hover:bg-emerald-400"
+            >
+              Save Changes
+            </button>
+          </div>
+        </ModalOverlay>
+      );
+    }
+
+    /* =========================================================
+       NOTIFICATIONS
+    ========================================================= */
+
+    function NotificationsPanel({
+      notifications,
+      professionals,
+      onClose,
+      onMarkRead,
+      onAccept
+    }) {
+      return (
+        <div className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-sm">
+          <div className="absolute bottom-0 left-0 right-0 top-0 mx-auto flex max-w-md flex-col bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-800 p-4">
+              <div>
+                <h3 className="text-base font-bold text-white">
+                  Notifications
+                </h3>
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  Stay up to date with your network
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onMarkRead}
+                  className="text-[10px] font-semibold text-emerald-400"
+                >
+                  Mark all read
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-2 overflow-y-auto p-4">
+              {notifications.length === 0 ? (
+                <EmptyState
+                  icon={<Bell className="h-8 w-8" />}
+                  title="You're all caught up"
+                  description="No new notifications."
+                />
+              ) : (
+                notifications.map((notification) => {
+                  const professional =
+                    professionals.find(
+                      (item) =>
+                        item.id ===
+                        notification.profId
+                    );
+
+                  return (
+                    <div
+                      key={notification.id}
+                      className={[
+                        "rounded-xl border p-3.5",
+                        notification.read
+                          ? "border-slate-800 bg-slate-800/40"
+                          : "border-emerald-500/20 bg-emerald-500/5"
+                      ].join(" ")}
+                    >
+                      <div className="flex items-start gap-3">
+                        {professional ? (
+                          <img
+                            src={
+                              professional.avatar
+                            }
+                            alt={
+                              professional.name
+                            }
+                            className="h-10 w-10 rounded-full border border-slate-700 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800">
+                            <Bell className="h-4 w-4 text-slate-500" />
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs leading-relaxed text-slate-300">
+                            <span className="font-semibold text-white">
+                              {professional
+                                ?.name ||
+                                "REALNET"}
+                            </span>{" "}
+                            {notification.text}
+                          </p>
+
+                          <p className="mt-1 text-[10px] text-slate-500">
+                            {notification.time}
+                          </p>
+
+                          {notification.actionNeeded &&
+                            professional && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  onAccept(
+                                    professional.id
+                                  )
+                                }
+                                className="mt-3 rounded-lg bg-emerald-500 px-3 py-1.5 text-[10px] font-bold text-slate-950"
+                              >
+                                Accept Connection
+                              </button>
+                            )}
+                        </div>
+
+                        {!notification.read && (
+                          <span className="mt-1 h-2 w-2 rounded-full bg-emerald-500" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* =========================================================
+       REUSABLE UI
+    ========================================================= */
+
+    function ProfessionalCard({
+      prof,
+      user,
+      onSelect,
+      onConnect
+    }) {
+      const isConnected =
+        user.connectedIds.includes(
+          prof.id
+        );
+
+      const isPending =
+        user.pendingSentIds.includes(
+          prof.id
+        );
+
+      return (
+        <article className="rounded-xl border border-slate-700/70 bg-slate-800/80 p-3.5 transition hover:border-slate-600">
+          <button
+            type="button"
+            onClick={onSelect}
+            className="flex w-full items-start gap-3 text-left"
+          >
+            <img
+              src={prof.avatar}
+              alt={prof.name}
+              className="h-12 w-12 shrink-0 rounded-full border border-slate-600 object-cover"
+            />
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2">
+                <h4 className="truncate text-xs font-bold text-white">
+                  {prof.name}
+                </h4>
+
+                <span className="shrink-0 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-400">
+                  {prof.role}
+                </span>
+              </div>
+
+              <p className="mt-0.5 truncate text-[11px] text-slate-300">
+                {prof.company}
+              </p>
+
+              <p className="mt-0.5 flex items-center text-[10px] text-slate-400">
+                <MapPin className="mr-0.5 h-3 w-3 text-slate-500" />
+                {prof.location}
+              </p>
+            </div>
+          </button>
+
+          <p className="mt-3 line-clamp-2 text-[11px] leading-relaxed text-slate-400">
+            {prof.bio}
+          </p>
+
+          <div className="mt-3 flex items-center justify-between border-t border-slate-700/50 pt-3">
+            <span className="text-[10px] text-slate-500">
+              {prof.connectionsCount} connections
+            </span>
+
+            <button
+              type="button"
+              onClick={onConnect}
+              className={[
+                "rounded-lg px-3 py-1.5 text-xs font-bold transition",
+                isConnected
+                  ? "bg-slate-700 text-emerald-400"
+                  : isPending
+                  ? "border border-amber-500/20 bg-amber-500/10 text-amber-400"
+                  : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+              ].join(" ")}
+            >
+              {isConnected
+                ? "Connected"
+                : isPending
+                ? "Pending"
+                : "+ Connect"}
+            </button>
+          </div>
+        </article>
+      );
+    }
+
+    function NavItem({
+      icon,
+      label,
+      badge,
+      active,
+      onClick
+    }) {
+      return (
+        <button
+          type="button"
+          onClick={onClick}
+          className={[
+            "relative flex h-full flex-1 flex-col items-center justify-center transition",
+            active
+              ? "text-emerald-400"
+              : "text-slate-400 hover:text-slate-200"
+          ].join(" ")}
+        >
+          <div className="relative">
+            {icon}
+
+            {badge && (
+              <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-slate-900 bg-emerald-500 px-1 text-[9px] font-extrabold text-slate-950">
+                {badge}
+              </span>
+            )}
+          </div>
+
+          <span className="mt-1 text-[10px] font-medium">
+            {label}
+          </span>
+        </button>
+      );
+    }
+
+    function BuildingIcon({ className = "" }) {
+      return (
+        <svg
+          className={className}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <rect
+            x="4"
+            y="2"
+            width="16"
+            height="20"
+            rx="2"
+          />
+          <path d="M9 22v-4h6v4" />
+          <path d="M8 6h.01" />
+          <path d="M16 6h.01" />
+          <path d="M8 10h.01" />
+          <path d="M16 10h.01" />
+          <path d="M8 14h.01" />
+          <path d="M16 14h.01" />
+        </svg>
+      );
+    }
+
+    function Field({
+      label,
+      value,
+      onChange,
+      placeholder = "",
+      type = "text"
+    }) {
+      return (
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-slate-400">
+            {label}
+          </span>
+
+          <input
+            type={type}
+            value={value}
+            onChange={(event) =>
+              onChange(event.target.value)
+            }
+            placeholder={placeholder}
+            className="w-full rounded-xl border border-slate-700 bg-slate-800/80 px-3.5 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-emerald-500"
+          />
+        </label>
+      );
+    }
+
+    function TextareaField({
+      label,
+      value,
+      onChange,
+      placeholder = ""
+    }) {
+      return (
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-slate-400">
+            {label}
+          </span>
+
+          <textarea
+            rows="3"
+            value={value}
+            onChange={(event) =>
+              onChange(event.target.value)
+            }
+            placeholder={placeholder}
+            className="w-full resize-none rounded-xl border border-slate-700 bg-slate-800/80 px-3.5 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-emerald-500"
+          />
+        </label>
+      );
+    }
+
+    function ModalOverlay({
+      children,
+      onClose
+    }) {
+      return (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              onClose();
+            }
+          }}
+        >
+          {children}
+        </div>
+      );
+    }
+
+    function FilterGroup({
+      title,
+      items,
+      value,
+      onChange
+    }) {
+      return (
+        <div className="mt-5">
+          <p className="mb-2 text-xs font-bold text-slate-400">
+            {title}
+          </p>
+
+          <div className="flex flex-wrap gap-1.5">
+            {items.map((item) => (
+              <button
+                type="button"
+                key={item}
+                onClick={() => onChange(item)}
+                className={[
+                  "rounded-lg px-3 py-1.5 text-[11px] font-medium transition",
+                  value === item
+                    ? "bg-emerald-500 font-bold text-slate-950"
+                    : "border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700"
+                ].join(" ")}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function EmptyState({
+      icon,
+      title,
+      description
+    }) {
+      return (
+        <div className="rounded-2xl border border-slate-800 bg-slate-800/30 px-6 py-12 text-center">
+          <div className="mx-auto mb-3 w-fit text-slate-600">
+            {icon}
+          </div>
+
+          <p className="text-sm font-semibold text-slate-300">
+            {title}
+          </p>
+
+          <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-slate-500">
+            {description}
+          </p>
+        </div>
+      );
+    }
+
+    function InfoRow({
+      label,
+      value,
+      last = false
+    }) {
+      return (
+        <div
+          className={[
+            "flex items-start justify-between gap-4 py-2.5",
+            !last &&
+              "border-b border-slate-700/60"
+          ].join(" ")}
+        >
+          <span className="text-xs text-slate-500">
+            {label}
+          </span>
+
+          <span className="text-right text-xs font-medium text-slate-200">
+            {value}
+          </span>
+        </div>
+      );
+    }
+
+    function SettingsRow({
+      icon,
+      label,
+      onClick,
+      accent = false,
+      danger = false,
+      last = false
+    }) {
+      return (
+        <button
+          type="button"
+          onClick={onClick}
+          className={[
+            "flex w-full items-center justify-between px-3.5 py-3.5 text-left transition hover:bg-slate-800",
+            !last &&
+              "border-b border-slate-700/60",
+            danger
+              ? "text-rose-400"
+              : "text-slate-200"
+          ].join(" ")}
+        >
+          <span className="flex items-center text-xs">
+            <span
+              className={[
+                "mr-2.5",
+                accent
+                  ? "text-emerald-400"
+                  : danger
+                  ? "text-rose-400"
+                  : "text-slate-400"
+              ].join(" ")}
+            >
+              {icon}
+            </span>
+
+            {label}
+          </span>
+
+          {!danger && (
+            <ChevronRight className="h-4 w-4 text-slate-500" />
+          )}
+        </button>
+      );
+    }
+
+    function PlanCard({
+      selected,
+      onClick,
+      title,
+      subtitle,
+      detail
+    }) {
+      return (
+        <button
+          type="button"
+          onClick={onClick}
+          className={[
+            "w-full rounded-xl border p-3 text-left transition",
+            selected
+              ? "border-emerald-500 bg-emerald-500/10"
+              : "border-slate-700 bg-slate-800"
+          ].join(" ")}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-white">
+                {title}
+              </p>
+              <p className="mt-0.5 text-[10px] text-emerald-400">
+                {subtitle}
+              </p>
+            </div>
+
+            {selected && (
+              <CheckCircle className="h-4 w-4 shrink-0 text-emerald-400" />
+            )}
+          </div>
+
+          <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
+            {detail}
+          </p>
+        </button>
+      );
+    }
+
+    /* =========================================================
+       MOUNT APP
+    ========================================================= */
+
+    const root =
+      ReactDOM.createRoot(
+        document.getElementById("root")
+      );
+
+    root.render(<App />);
+  </script>
+</body>
+</html>
